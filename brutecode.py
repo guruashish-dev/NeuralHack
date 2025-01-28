@@ -1,8 +1,4 @@
-#This has proper time complexity than brutecodev2.py
-
 import itertools
-import string
-import time
 
 filename = "credentials.txt"
 try:
@@ -17,29 +13,19 @@ except IndexError:
     print("The file must contain the username on the first line and password on the second line.")
     exit()
 
-def incremental_brute_force(password, char_set):
-    print(f"Attempting to brute force a password of length {len(password)}...")
-    start_time = time.time()
-    cracked_password = ""
 
-    for position in range(len(password)):
-        for char in char_set:
-            print(f"Trying character '{char}'")
-            
-            if password[position] == char:
-                cracked_password += char
-                print(f"'{char}'{position + 1}.{cracked_password}")
-                break 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Password cracked in {elapsed_time:.2f} seconds.")
-    return cracked_password
+def brute_force_password(password):
+    max_length = len(password)  
+    print(f"Attempting to brute force password of length {max_length}...")
+    
+    for length in range(1, max_length + 1):  
+        for guess in itertools.product("0123456789", repeat=length):
+            attempt = ''.join(guess)
+            print(f"Trying: {attempt}")  
+            if attempt == password:
+                return attempt
 
-character_set = string.ascii_letters + string.digits + string.punctuation
+# Call the brute force function
+cracked_password = brute_force_password(password)
 
-cracked_password = incremental_brute_force(password, character_set)
 
-if cracked_password == password:
-    print(f"\n\nPassword cracked successfully! \nUsername: {username}, Password: {cracked_password}")
-else:
-    print("Password could not be cracked.")
