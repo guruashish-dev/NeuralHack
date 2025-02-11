@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brute Force Password Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h1 class="text-2xl font-bold text-center mb-4">🔐 Brute Force Password Tester</h1>
+
+        <label class="block text-sm font-medium mb-2">Enter Username:</label>
+        <input type="text" id="usernameInput" 
+               class="w-full p-2 text-gray-900 rounded-md outline-none" 
+               placeholder="Type a username..." />
+
+        <label class="block text-sm font-medium mt-4 mb-2">Enter Password:</label>
+        <input type="text" id="passwordInput" 
+               class="w-full p-2 text-gray-900 rounded-md outline-none" 
+               placeholder="Type any password..." />
+
+        <button onclick="startBruteForce()" 
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 mt-4 rounded-md transition">
+            Start Brute Force
+        </button>
+
+        <h3 class="text-lg font-semibold mt-6">Live Log:</h3>
+        <textarea id="log" 
+                  class="w-full h-40 p-2 mt-2 bg-gray-700 text-green-400 rounded-md outline-none overflow-y-auto" 
+                  readonly></textarea>
+    </div>
+
+    <script>
+        var eventSource;
+
+        function startBruteForce() {
+            var username = document.getElementById("usernameInput").value;
+            var password = document.getElementById("passwordInput").value;
+
+            if (!username || !password) {
+                alert("⚠️ Please enter both username and password.");
+                return;
+            }
+
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            document.getElementById("log").value = "🔄 Starting brute force...\n";
+            eventSource = new EventSource(`/stream?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+
+            eventSource.onmessage = function(event) {
+                console.log("Received:", event.data);
+                document.getElementById("log").value += event.data + "\n";
+                document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
+
+                if (event.data.includes("DONE")) {
+                    eventSource.close();
+                    console.log("✅ Brute-force complete. Stopping EventSource.");
+                }
+            };
+
+            eventSource.onerror = function(event) {
+                console.error("⚠️ EventSource error. Closing.");
+                eventSource.close();
+            };
+        }
+    </script>
+</body>
+</html>
